@@ -11,7 +11,7 @@ export type Tokens = {
 };
 
 export type AccountType = {
+  name: string;
   address: string;
   balance: number;
-  tokens: Tokens[];
 };

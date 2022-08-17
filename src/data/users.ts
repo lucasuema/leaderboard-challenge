@@ -1,18 +1,18 @@
 export const users = [
   {
-    name: "Team member 1",
+    name: "Dread Pirate John",
     address: "0xC62A517b7Cf5126d8F709BFB3Dbcba8a4D8eD5ce",
   },
   {
-    name: "Team member 2",
+    name: "Captain Pete",
     address: "0x9F836913343C0B46771206De4018Fcdd0D76A271",
   },
   {
-    name: "Team member 3",
+    name: "Lucy The Pirate",
     address: "0x956C23b9E573FBBab69F2D4C06eb776c1bB98113",
   },
   {
-    name: "Team member 4",
+    name: "Long Nataly Ginger",
     address: "0xC21A69E9e83dE0960E889AddD2c7a32F518B8D12",
   },
   {
@@ -60,15 +60,15 @@ export const users = [
     address: "0xa8704208FB8f505D0ad8476D99Dd584C93C11729",
   },
   {
-    name: "Team member 16",
+    name: "Billplank",
     address: "0xf9585c2CD430d7E0985a08548d7090C52e21d223",
   },
   {
-    name: "Team member 17",
+    name: "Evie Barr",
     address: "0xca2133BC59F1cD923E4840564a7f19046530f15b",
   },
   {
-    name: "Team member 18",
+    name: "Gracie Hensley",
     address: "0x01E2dAb248718a724546ABdCD2d27bFb17fa0b38",
   },
 ];
