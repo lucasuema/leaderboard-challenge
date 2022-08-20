@@ -42,7 +42,7 @@ export const sendCoins = async (
   // send transaction
   try {
     const response = await tokenInstance.methods
-      .transfer(toAddress, web3Instance.utils.toWei(amount.toString(), "wei"))
+      .transfer(toAddress, web3Instance.utils.toWei(amount.toString(), "ether"))
       .send({ from: fromAddress })
       .then((hash: any) => {
         return hash;
