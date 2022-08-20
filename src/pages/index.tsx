@@ -283,6 +283,20 @@ const IndexPage = () => {
           input.error {
             border: 2px solid red;
           }
+
+          ::-webkit-scrollbar {
+            width: 15px;
+          }
+          ::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          ::-webkit-scrollbar-thumb {
+            background: #076385;
+            border-radius: 4px;
+          }
+          ::-webkit-scrollbar-thumb:hover {
+            background: #097CA6;
+          }
         `}
       </style>
       <style jsx>{`
