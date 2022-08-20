@@ -1,15 +1,15 @@
 import React, { useEffect } from "react";
-import dynamic from "next/dynamic";
 import ClipLoader from "react-spinners/ClipLoader";
-
-const Leaderboard = dynamic(() => import("../components/Leaderboard"));
-
 import Layout from "../components/Layout";
 import Web3 from "web3";
 import tokenABI from "../lib/tokenABI";
 import { useState } from "react";
 import { AccountType } from "../interfaces";
-import { users } from "../data/users";
+import { getUsers } from "../lib/getUsers";
+import { ScreenType } from "../types/ScreenType";
+import SendCoinsForm from "../components/SendCoinsForm";
+import AddUserForm from "../components/AddUserForm";
+import Leaderboard from "../components/Leaderboard";
 
 const tokenAddresses = [
   {
@@ -24,6 +24,9 @@ const IndexPage = () => {
   const [accounts, setAccounts] = useState<AccountType[]>([]);
   const [web3Enabled, setWeb3Enabled] = useState(false);
   const [isLoadingLeaderboard, setLoadingLeaderBoard] = useState(false);
+  const [screenType, setScreenType] = useState(ScreenType.LEADERBOARD);
+  const [web3Instance, setWeb3Instance] = useState<Web3>();
+  const [tokenInstance, setTokenInstance] = useState<any>();
 
   useEffect(() => {
     if ((window as any).ethereum) {
@@ -39,6 +42,7 @@ const IndexPage = () => {
 
     if (web3Enabled) {
       web3 = new Web3((window as any).ethereum);
+      setWeb3Instance(web3);
       const netId = await web3.eth.net.getNetworkType();
 
       if (netId !== ALLOWED_NETWORK) {
@@ -55,12 +59,16 @@ const IndexPage = () => {
           const tokenBalances = await Promise.all(
             tokenAddresses.map(async (token) => {
               const tokenInst = new web3.eth.Contract(tokenABI, token.address);
+              setTokenInstance(tokenInst);
 
               const balance = await tokenInst.methods.balanceOf(address).call();
 
               const promises: any[] = [];
 
               setLoadingLeaderBoard(true);
+
+              // fetch users from database
+              const users = await getUsers();
 
               users.forEach((u) => {
                 const promise = tokenInst.methods.balanceOf(u.address).call();
@@ -76,8 +84,6 @@ const IndexPage = () => {
                 };
               });
               mappedBalance.sort((a, b) => b.balance - a.balance);
-
-              setLoadingLeaderBoard(false);
 
               return {
                 token: token.token,
@@ -95,6 +101,7 @@ const IndexPage = () => {
         })
       );
       setAccounts(newAccounts);
+      setLoadingLeaderBoard(false);
     } else {
       window.alert("Please install Metamask");
     }
@@ -106,13 +113,21 @@ const IndexPage = () => {
     setWeb3Enabled(true);
   };
 
+  const navigateToLeaderboard = async () => {
+    setLoadingLeaderBoard(true);
+    setScreenType(ScreenType.LEADERBOARD);
+    await loadBlockchainData();
+  };
+  const navigateToAddUserForm = () => setScreenType(ScreenType.ADD_USER);
+  const navigateToSendCoinsForm = () => setScreenType(ScreenType.SEND_COINS);
+
   return (
-    <Layout title="🏦 $LC Token 🏦">
-      <h1>🏦 $LC Token 🏦</h1>
+    <Layout title="Leaderboard">
+      <h1>Leaderboard</h1>
 
       {web3Enabled && accounts.length === 0 && (
         <div className="actions">
-          <button className="actions" onClick={loginToMetaMask}>
+          <button className="actions primary" onClick={loginToMetaMask}>
             Must hold 50 $LC to unlock
           </button>
         </div>
@@ -131,52 +146,144 @@ const IndexPage = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          margin: "5px 0px",
         }}
       >
-        <ClipLoader color="black" loading={isLoadingLeaderboard} size={40} />
+        <ClipLoader color="white" loading={isLoadingLeaderboard} size={40} />
       </div>
 
-      {accounts && accounts.length > 0 && !isLoadingLeaderboard && (
-        <div className="actions">
-          
+      {accounts &&
+        accounts.length > 0 &&
+        !isLoadingLeaderboard &&
+        screenType === ScreenType.LEADERBOARD && (
+          <div className="actions button-group">
+            <button className="button primary" onClick={navigateToAddUserForm}>
+              Add new peer
+            </button>
+            <button
+              className="button primary invert"
+              onClick={navigateToSendCoinsForm}
+            >
+              Send funds
+            </button>
           </div>
-      )}
+        )}
 
-      {accounts && accounts.length > 0 && !isLoadingLeaderboard && (
-        <div className="accounts">
-          {accounts.map((account) => {
-            return (
-              <div className="account" key={account.address}>
-                <Leaderboard account={account} />
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {accounts &&
+        accounts.length > 0 &&
+        !isLoadingLeaderboard &&
+        screenType === ScreenType.LEADERBOARD && (
+          <div className="accounts">
+            {accounts.map((account) => {
+              return (
+                <div className="main-panel" key={account.address}>
+                  <Leaderboard account={account} />
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+      {accounts &&
+        accounts.length > 0 &&
+        !isLoadingLeaderboard &&
+        screenType === ScreenType.ADD_USER && (
+          <div className="main-panel add-user">
+            {web3Instance && tokenInstance ? (
+              <AddUserForm
+                web3Instance={web3Instance}
+                onReturn={navigateToLeaderboard}
+              />
+            ) : (
+              <p>Please install Metamask and log in.</p>
+            )}
+          </div>
+        )}
+
+      {accounts &&
+        accounts.length > 0 &&
+        !isLoadingLeaderboard &&
+        screenType === ScreenType.SEND_COINS && (
+          <div className="main-panel send-funds">
+            {web3Instance && tokenInstance ? (
+              <SendCoinsForm
+                web3Instance={web3Instance}
+                tokenInstance={tokenInstance}
+                onReturn={navigateToLeaderboard}
+              />
+            ) : (
+              <p>Please install Metamask and log in.</p>
+            )}
+          </div>
+        )}
 
       <style jsx global>
         {`
           body {
-            padding: 0;
-            margin: 0;
+            padding: 0px;
+            margin: 0px;
+            background: url("images/background.png");
+            overflow: hidden;
+          }
+
+          button.primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-family: "SpaceMono";
+            font-style: normal;
+            font-weight: 700;
+            font-size: 22px;
+            line-height: 149%;
+            background: #03efcb;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            margin: 0px 10px;
+
+            color: #322850;
+
+            text-shadow: 0px 2px 0px rgba(0, 0, 0, 0.15);
+          }
+
+          button.primary:hover,
+          button.primary.invert:hover {
+            background: #f617bd;
+          }
+
+          button.primary.invert {
+            background: #ffffff;
+            color: #322850;
+          }
+
+          div.button-group {
+            display: flex;
+            margin: 15px 0px;
+            align-items: center;
           }
         `}
       </style>
       <style jsx>{`
         h1 {
-          font-size: 60px;
-          text-align: center;
-          font-family: "Recoleta Regular DEMO";
-        }
+          font-family: "I pixel u";
+          font-style: normal;
+          font-weight: 400;
+          font-size: 78px;
+          line-height: 149%;
 
-        .actions {
           display: flex;
           align-items: center;
-          justify-content: center;
-          padding: 15px;
-          border-radius: 10px;
-          font-family: "Recoleta Regular DEMO";
-          font-size: 20px;
+          text-align: center;
+          letter-spacing: 0.01em;
+          text-transform: uppercase;
+
+          color: #ebf9fe;
+          margin-bottom: 20px;
+        }
+
+        h2 {
+          text-transform: uppercase;
         }
 
         .warning {
@@ -188,13 +295,19 @@ const IndexPage = () => {
           font-family: "Recoleta Regular DEMO";
         }
 
-        .leaderboard {
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        .main-panel {
           margin-top: 10px;
           color: black;
           font-family: "Recoleta Regular DEMO";
+          background-color: #ebf9fe;
+          border-radius: 10px;
+          padding: 0px 20px;
+          max-height: 50vh;
+          width: clamp(50vw, 900px, 90vw);
+          overflow: auto;
+          border-width: 5px;
+          border-style: solid;
+          border-color: #03efcb #f617bd #f617bd #03efcb;
         }
 
         .play {
@@ -215,13 +328,17 @@ const IndexPage = () => {
         }
 
         button {
-          background: black;
-          color: white;
           border: none;
           border-radius: 10px;
           padding: 15px;
           cursor: pointer;
           font-family: "Recoleta Regular DEMO";
+          text-transform: uppercase;
+          margin: 0px 10px;
+        }
+
+        button:hover {
+          background: grey;
         }
 
         .account {

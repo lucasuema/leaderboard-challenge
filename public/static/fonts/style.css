@@ -6,3 +6,15 @@
     font-weight: normal;
     src: local('Recoleta Regular DEMO'), url('Recoleta-RegularDEMO.woff') format('woff');
     }
+    @font-face {
+    font-family: 'I pixel u';
+    font-style: normal;
+    font-weight: normal;
+    src: local('I pixel u'), url('ipixelu.woff') format('woff');
+    }
+    @font-face {
+    font-family: 'SpaceMono';
+    font-style: normal;
+    font-weight: normal;
+    src: local('SpaceMono'), url('SpaceMono-Regular.woff') format('woff');
+    }
