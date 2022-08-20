@@ -7,7 +7,7 @@ export const getUsers = async () => {
     const { data, error } = await supabase.from("users").select();
     if (error) throw error;
 
-    const users: Omit<UserBalance, "balance">[] = data;
+    const users = data as Omit<UserBalance, "balance">[];
     console.info(`Retrieved ${users.length} users.`);
     return users;
   } catch (error) {

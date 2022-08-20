@@ -22,7 +22,7 @@ export const upsertUser = async (web3Instance: Web3, newUser: NewUserType) => {
   // update name or create new user (no need to check if exists)
   try {
     const { error, data } = await supabase.from("users").upsert([newUser]);
-    if (error) throw error;
+    if (!data || error) throw error;
     console.info(
       `Added new user with address ${data[0].address.substring(0, 5)}...`
     );
