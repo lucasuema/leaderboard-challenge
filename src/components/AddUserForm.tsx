@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Web3 from "web3";
 import { upsertUser } from "../lib/upsertUser";
+import { validateAddress, validateName } from "../lib/validators";
 
 type PropsType = {
   web3Instance: Web3;
@@ -11,6 +12,8 @@ const AddUserForm = ({ web3Instance, onReturn }: PropsType) => {
   const [address, setAddress] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasNameError, setHasNameError] = useState<boolean>(false)
+  const [hasAddressError, setHasAddressError] = useState<boolean>(false);
 
   const onComplete = () => {
     setName("");
@@ -33,20 +36,24 @@ const AddUserForm = ({ web3Instance, onReturn }: PropsType) => {
         type="text"
         name="name"
         value={name}
+        className={`${hasNameError ? "error" : ""}`}
         onChange={(event) => setName(event.target.value)}
+        onBlur={() => setHasNameError(validateName(name))}
       />
       <label htmlFor="address">Address</label>
       <input
         type="text"
         name="address"
+        className={`${hasAddressError ? "error" : ""}`}
         value={address}
         onChange={(event) => setAddress(event.target.value)}
+        onBlur={() => setHasAddressError(validateAddress(web3Instance, address))}
       />
       <div className="button-group">
         <button
           className="button primary"
           onClick={onAdd}
-          disabled={isLoading || !name || !address}
+          disabled={isLoading || !name || !address || hasNameError || hasAddressError}
         >
           Add
         </button>
@@ -64,15 +71,6 @@ const AddUserForm = ({ web3Instance, onReturn }: PropsType) => {
           flex-direction: column;
           padding: 20px;
           font-family: "SpaceMono";
-        }
-
-        label,
-        input {
-          font-size: 20px;
-        }
-
-        input {
-          margin: 10px 0px;
         }
       `}</style>
     </div>

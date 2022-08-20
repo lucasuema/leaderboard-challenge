@@ -247,9 +247,10 @@ const IndexPage = () => {
             text-shadow: 0px 2px 0px rgba(0, 0, 0, 0.15);
           }
 
-          button.primary:hover,
-          button.primary.invert:hover {
+          button.primary:hover:not(:disabled),
+          button.primary.invert:hover:not(:disabled) {
             background: #f617bd;
+            cursor: pointer;
           }
 
           button.primary.invert {
@@ -261,6 +262,26 @@ const IndexPage = () => {
             display: flex;
             margin: 15px 0px;
             align-items: center;
+          }
+
+          button.primary:disabled {
+            opacity: 0.5;
+          }
+
+          label,
+          input {
+            font-size: 20px;
+          }
+
+          input {
+            border-radius: 6px;
+            padding: 6px 10px;
+            margin: 10px 0px;
+            border: 2px solid #ccc;
+          }
+
+          input.error {
+            border: 2px solid red;
           }
         `}
       </style>

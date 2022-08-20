@@ -50,7 +50,7 @@ export const sendCoins = async (
     console.info(`Sent ${amount} tokens to ${toAddress.substring(0, 5)}...`);
     return [null, response];
   } catch (error) {
-    window.alert(error);
+    window.alert(JSON.stringify(error));
     return [error, null];
   }
 };
